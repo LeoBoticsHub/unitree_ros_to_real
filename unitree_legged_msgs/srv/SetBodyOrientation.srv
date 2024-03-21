@@ -1,0 +1,4 @@
+geometry_msgs/Vector3 rpy
+---
+bool success
+string message

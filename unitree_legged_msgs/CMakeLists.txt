@@ -23,6 +23,16 @@ add_message_files(
   HighState.msg
 )
 
+add_service_files(
+  FILES
+  GetBatteryState.srv
+  GetFloat.srv
+  GetInt.srv
+  SetBodyOrientation.srv
+  SetFloat.srv
+  SetInt.srv
+)
+
 generate_messages(
   DEPENDENCIES
   std_msgs
