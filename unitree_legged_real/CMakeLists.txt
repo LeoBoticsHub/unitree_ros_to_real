@@ -39,5 +39,9 @@ add_executable(ros_udp src/exe/ros_udp.cpp)
 target_link_libraries(ros_udp ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(ros_udp ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+add_executable(unitree_high_ros_control src/exe/unitree_high_ros_control.cpp)
+target_link_libraries(unitree_high_ros_control ${EXTRA_LIBS} ${catkin_LIBRARIES})
+add_dependencies(unitree_high_ros_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 
