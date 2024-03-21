@@ -6,30 +6,25 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     geometry_msgs
+    sensor_msgs
+    nav_msgs
+    std_srvs
     unitree_legged_msgs
+    tf2_ros
 )
 
 catkin_package()
 
-message("-- CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
-if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64.*")
-  set(ARCH amd64)
-else()
-  set(ARCH arm64)
-endif()
+link_directories(/usr/local/lib/libunitree_legged_sdk.so)
 
-link_directories(${CMAKE_SOURCE_DIR}/unitree_ros_to_real/unitree_legged_sdk/lib/cpp/${ARCH})
-
-set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
+set(EXTRA_LIBS -pthread unitree_legged_sdk)
 
 set(CMAKE_CXX_FLAGS "-O3 -fPIC")
 
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/unitree_ros_to_real/unitree_legged_sdk/include
 )
-
 
 
 add_executable(example_walk src/exe/example_walk.cpp)
