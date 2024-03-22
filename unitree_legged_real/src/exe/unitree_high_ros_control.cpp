@@ -1,6 +1,7 @@
-'''
-Copyright (C) 2024 Federico Rollo, Leonardo Innovation Labs - All Rights Reserved
-'''
+/*
+** Copyright (C) 2024 Federico Rollo, Leonardo Innovation Labs - All Rights Reserved
+**/
+
 #include <ros/ros.h>
 #include "unitree_legged_sdk/unitree_legged_sdk.h"
 #include <chrono>

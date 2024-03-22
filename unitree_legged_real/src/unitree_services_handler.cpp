@@ -1,6 +1,7 @@
-'''
-Copyright (C) 2024 Federico Rollo, Leonardo Innovation Labs - All Rights Reserved
-'''
+/*
+** Copyright (C) 2024 Federico Rollo, Leonardo Innovation Labs - All Rights Reserved
+**/
+
 #include "unitree_legged_real/unitree_services_handler.hpp"
 
 /**
