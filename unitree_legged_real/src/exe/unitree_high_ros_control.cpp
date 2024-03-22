@@ -263,8 +263,6 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
 
 /**
  * @brief callback used to power off the robot when it is in crouched position
- * 
- * @param std_srvs/Trigger  
  */
 bool powerOffCallback(
     std_srvs::Trigger::Request& req, 
@@ -290,8 +288,6 @@ bool powerOffCallback(
 
 /**
  * @brief callback used to power off the robot always as an emergency button. BE CAREFUL IN USING IT.
- * 
- * @param std_srvs/Trigger 
  */
 bool emergencyStopCallback(
     std_srvs::Trigger::Request& req, 
@@ -329,11 +325,7 @@ bool batteryStateCallback(
 }
 
 /**
- *
  * @brief Callback used for setting robot mode, e.g. stand up, stand down, walk, etc
- * 
- * @param 
- * 
  */
 bool setRobotModeCallback(
     unitree_legged_msgs::SetInt::Request& req, 
