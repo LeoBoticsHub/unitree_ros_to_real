@@ -13,18 +13,21 @@ find_package(catkin REQUIRED COMPONENTS
     tf2_ros
 )
 
-catkin_package()
-
-link_directories(/usr/local/lib/libunitree_legged_sdk.so)
-
-set(EXTRA_LIBS -pthread unitree_legged_sdk)
-
-set(CMAKE_CXX_FLAGS "-O3 -fPIC")
-
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
 )
+
+link_directories(/usr/local/lib/libunitree_legged_sdk.so)
+
+catkin_package(
+    INCLUDE_DIRS include
+    LIBRARIES unitree_services_handler
+)
+
+set(EXTRA_LIBS -pthread unitree_legged_sdk)
+
+set(CMAKE_CXX_FLAGS "-O3 -fPIC")
 
 
 add_executable(example_walk src/exe/example_walk.cpp)
@@ -39,9 +42,24 @@ add_executable(ros_udp src/exe/ros_udp.cpp)
 target_link_libraries(ros_udp ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(ros_udp ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+# High level ros control for B1 robot
 add_executable(unitree_high_ros_control src/exe/unitree_high_ros_control.cpp)
 target_link_libraries(unitree_high_ros_control ${EXTRA_LIBS} ${catkin_LIBRARIES})
 add_dependencies(unitree_high_ros_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+# Service interface library to easily call high level ros services
+add_library(unitree_services_handler SHARED src/unitree_services_handler.cpp)
+target_link_libraries(unitree_high_ros_control ${catkin_LIBRARIES})
 
+# Install
+install(
+  DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
+install(
+  TARGETS unitree_services_handler
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
