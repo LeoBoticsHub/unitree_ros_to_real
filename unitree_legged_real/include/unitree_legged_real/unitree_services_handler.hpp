@@ -1,3 +1,6 @@
+'''
+Copyright (C) 2024 Federico Rollo, Leonardo Innovation Labs - All Rights Reserved
+'''
 #ifndef UNITREE_SERVICE_HANDLER_HPP
 #define UNITREE_SERVICE_HANDLER_HPP
 
