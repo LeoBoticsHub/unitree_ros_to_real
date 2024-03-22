@@ -93,6 +93,7 @@ ros::ServiceServer set_foot_height_srv;
 ros::ServiceServer set_body_height_srv;
 ros::ServiceServer get_foot_height_srv;
 ros::ServiceServer get_body_height_srv;
+ros::ServiceServer set_body_orientation_srv;
 
 // ROS messages
 sensor_msgs::Imu imu_msg;
@@ -539,7 +540,7 @@ bool setBodyOrientationCallback(
     unitree_legged_msgs::SetBodyOrientation::Response& res
 )
 {
-    // it works just in mode 1
+    // it works just in mode 1 andhas bounds for the three angles
     if (custom.high_state.mode == 1 && 
         req.rpy.x >= -0.3 && req.rpy.x <= 0.3 &&
         req.rpy.y >= -0.3 && req.rpy.y <= 0.3 &&
@@ -606,6 +607,7 @@ int main(int argc, char **argv)
     get_foot_height_srv = nh.advertiseService("get_foot_height", getFootHeightCallback);
     set_body_height_srv = nh.advertiseService("set_body_height", setBodyHeightCallback);
     get_body_height_srv = nh.advertiseService("get_body_height", getBodyHeightCallback);
+    set_body_orientation_srv = nh.advertiseService("set_body_orientation", setBodyOrientationCallback);
 
     LoopFunc loop_udpSend("high_udp_send", 0.002, 3, boost::bind(&Custom::highUdpSend, &custom));
     LoopFunc loop_udpRecv("high_udp_recv", 0.002, 3, boost::bind(&Custom::highUdpRecv, &custom));
