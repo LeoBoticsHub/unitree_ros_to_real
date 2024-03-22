@@ -4,7 +4,8 @@
   <version>0.0.0</version>
   <description>The unitree_legged_real package</description>
 
-  <maintainer email="laikago@unitree.cc">unitree</maintainer>
+  <maintainer email="federico.rollo@leonardo.com">Federico Rollo</maintainer>
+  <!-- <maintainer email="laikago@unitree.cc">unitree</maintainer> -->
   <license>TODO</license>
 
   <buildtool_depend>catkin</buildtool_depend>

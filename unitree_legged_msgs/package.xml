@@ -6,7 +6,9 @@
   <description>
     The test messgaes package.
   </description>
-  <maintainer email="laikago@unitree.cc">unitree</maintainer>
+
+  <maintainer email="federico.rollo@leonardo.com">Federico Rollo</maintainer>
+  <!-- <maintainer email="laikago@unitree.cc">unitree</maintainer> -->
   <license>TODO</license>
   
   <buildtool_depend>catkin</buildtool_depend>
