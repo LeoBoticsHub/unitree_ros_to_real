@@ -545,8 +545,8 @@ bool setBodyOrientationCallback(
     )
     {
         custom.high_cmd.euler[0] = req.rpy.x;
-        custom.high_cmd.euler[0] = req.rpy.y;
-        custom.high_cmd.euler[0] = req.rpy.z;
+        custom.high_cmd.euler[1] = req.rpy.y;
+        custom.high_cmd.euler[2] = req.rpy.z;
         custom.high_cmd.velocity[0] = 0;
         custom.high_cmd.velocity[1] = 0;
         custom.high_cmd.yawSpeed    = 0;
