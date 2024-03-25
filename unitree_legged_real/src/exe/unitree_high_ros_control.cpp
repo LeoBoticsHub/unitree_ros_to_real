@@ -291,12 +291,16 @@ bool emergencyStopCallback(
     std_srvs::Trigger::Response& res
 )
 {
-    BmsCmd battery_cmd;
-    battery_cmd.off = 0xA5;
-    custom.high_cmd.bms = battery_cmd;
+    custom.high_cmd.euler[0] = 0;
+    custom.high_cmd.euler[1] = 0;
+    custom.high_cmd.euler[2] = 0;
+    custom.high_cmd.velocity[0] = 0;
+    custom.high_cmd.velocity[1] = 0;
+    custom.high_cmd.yawSpeed    = 0;
+    custom.high_cmd.mode = 7;
 
     res.success = true;
-    res.message = "Powering off the robot.";
+    res.message = "Emergency Stop! Robot set in dumping mode.";
 
     return true;
 }
