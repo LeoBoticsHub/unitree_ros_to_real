@@ -203,7 +203,6 @@ void highStatePublisher()
 	    odom_H_trunk.transform.translation.y       = static_cast<double>(custom.high_state.position[1]);
 	    odom_H_trunk.transform.translation.z       = static_cast<double>(custom.high_state.position[2]);
 	    odom_H_trunk.transform.rotation            = imu_msg.orientation;
-        tf_pub->sendTransform(odom_H_trunk);
 
         // publish state messages
         joint_states_pub.publish(joint_state_msg);
