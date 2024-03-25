@@ -155,9 +155,7 @@ void highStatePublisher()
 
     if (t != t_prev)
     {   
-
         // joint states
-
         joint_state_msg.header.seq++;
         joint_state_msg.header.stamp = t;
         joint_state_msg.header.frame_id = BASE_LINK_NAME;
@@ -171,7 +169,6 @@ void highStatePublisher()
 	    }
 
         // imu
-
         imu_msg.header.seq++;
 	    imu_msg.header.stamp = t;
 	    imu_msg.header.frame_id = IMU_NAME;
@@ -202,7 +199,6 @@ void highStatePublisher()
 	    odom_msg.twist.twist.angular        = imu_msg.angular_velocity;
 
         // odom -> base_link
-
         odom_H_trunk.transform.translation.x       = static_cast<double>(custom.high_state.position[0]);
 	    odom_H_trunk.transform.translation.y       = static_cast<double>(custom.high_state.position[1]);
 	    odom_H_trunk.transform.translation.z       = static_cast<double>(custom.high_state.position[2]);
@@ -578,6 +574,10 @@ int main(int argc, char **argv)
     joint_state_msg.velocity.resize(N_MOTORS);
     joint_state_msg.effort.resize(N_MOTORS);
 
+    // set odom frame ids
+    odom_H_trunk.header.frame_id = ODOM_NAME;
+    odom_H_trunk.child_frame_id = BASE_LINK_NAME;
+
     // initialize time
     t = t_prev = t_timer = t_mode_timer = ros::Time::now();
 
@@ -605,6 +605,7 @@ int main(int argc, char **argv)
     get_body_height_srv = nh.advertiseService("get_body_height", getBodyHeightCallback);
     set_body_orientation_srv = nh.advertiseService("set_body_orientation", setBodyOrientationCallback);
 
+    // high state udp loop function
     LoopFunc loop_udpSend("high_udp_send", 0.002, 3, boost::bind(&Custom::highUdpSend, &custom));
     LoopFunc loop_udpRecv("high_udp_recv", 0.002, 3, boost::bind(&Custom::highUdpRecv, &custom));
 
