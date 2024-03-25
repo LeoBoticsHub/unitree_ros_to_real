@@ -199,6 +199,8 @@ void highStatePublisher()
 	    odom_msg.twist.twist.angular        = imu_msg.angular_velocity;
 
         // odom -> base_link
+        odom_H_trunk.header.seq++;
+        odom_H_trunk.header.stamp = t;
         odom_H_trunk.transform.translation.x       = static_cast<double>(custom.high_state.position[0]);
 	    odom_H_trunk.transform.translation.y       = static_cast<double>(custom.high_state.position[1]);
 	    odom_H_trunk.transform.translation.z       = static_cast<double>(custom.high_state.position[2]);
@@ -354,7 +356,7 @@ bool setRobotModeCallback(
         res.message = "Error! Invalid Robot state! \
         Please be sure to wait some time before switching consecutive states. \
         check also if Robot state switch from current mode " + std::to_string(custom.high_state.mode) + \
-        "to requested state mode " + std::to_string(req.value) + " is permitted.";
+        " to requested state mode " + std::to_string(req.value) + " is permitted.";
     }
 
     return true;
