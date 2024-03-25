@@ -267,7 +267,7 @@ bool powerOffCallback(
 )
 {
     // only if in stand down position
-    if(custom.high_state.mode == 5)
+    if(custom.high_state.mode == 7)
     {
         BmsCmd battery_cmd;
         battery_cmd.off = 0xA5;
