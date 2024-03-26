@@ -396,7 +396,6 @@ bool batteryStateCallback(
     return true;
 }
 
-
 /**
  * @brief Callback used for standing up the robot
  */
@@ -414,10 +413,14 @@ bool standUpCallback(
         custom.high_cmd.velocity[0] = 0;
         custom.high_cmd.velocity[1] = 0;
         custom.high_cmd.yawSpeed    = 0;
-        sleep(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         custom.high_cmd.mode = 6;
-        sleep(3);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
         custom.high_cmd.mode = 1;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        custom.high_cmd.mode = 2;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        custom.high_cmd.mode = 0;
 
         res.success = true;
         res.message = "Robot stand up completed.";
