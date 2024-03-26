@@ -452,8 +452,10 @@ bool standDownCallback(
         custom.high_cmd.velocity[1] = 0;
         custom.high_cmd.yawSpeed    = 0;
         custom.high_cmd.mode = 6;
-        sleep(3);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         custom.high_cmd.mode = 5;
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        custom.high_cmd.mode = 0;
 
         res.success = true;
         res.message = "Robot stand down completed.";
