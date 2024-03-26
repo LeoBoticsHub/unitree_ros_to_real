@@ -87,7 +87,8 @@ std::shared_ptr<tf2_ros::TransformBroadcaster> tf_pub;
 // Services
 ros::ServiceServer power_off_srv;
 ros::ServiceServer emergency_button_srv;
-ros::ServiceServer set_mode_srv;
+ros::ServiceServer stand_up_srv;
+ros::ServiceServer stand_down_srv;
 ros::ServiceServer get_mode_srv;
 ros::ServiceServer set_gate_srv;
 ros::ServiceServer get_gate_srv;
@@ -325,22 +326,17 @@ bool batteryStateCallback(
     return true;
 }
 
+
 /**
- * @brief Callback used for setting robot mode, e.g. stand up, stand down, walk, etc
+ * @brief Callback used for standing up the robot
  */
-bool setRobotModeCallback(
-    unitree_legged_msgs::SetInt::Request& req, 
-    unitree_legged_msgs::SetInt::Response& res
+bool standUpCallback(
+    std_srvs::Trigger::Request& req, 
+    std_srvs::Trigger::Response& res
 )
 {
-    // iterator on robot state mapping that point to the current mode value
-    auto map_iterator = robot_state_mapping.find(custom.high_state.mode);
-
-    if ((t - t_mode_timer).sec >= 3 && // check previous call timer
-        map_iterator != robot_state_mapping.end() && // check if map value exists (it should be useless because states should all exists)
-        std::find(map_iterator->second.begin(), map_iterator->second.end(), req.value) != 
-        map_iterator->second.end() // check if requested value is available in vector of possible states
-    )
+    const std::lock_guard<std::mutex> lock(stand_mtx);
+    if (custom.high_state.mode == 7) // If in dumping mode
     {
         custom.high_cmd.euler[0] = 0;
         custom.high_cmd.euler[1] = 0;
@@ -348,19 +344,51 @@ bool setRobotModeCallback(
         custom.high_cmd.velocity[0] = 0;
         custom.high_cmd.velocity[1] = 0;
         custom.high_cmd.yawSpeed    = 0;
-        custom.high_cmd.mode = req.value;
-        res.success = true;
-        res.message = "Robot state set to: " + std::to_string(req.value);
+        sleep(1);
+        custom.high_cmd.mode = 6;
+        sleep(3);
+        custom.high_cmd.mode = 1;
 
-        t_mode_timer = t;
+        res.success = true;
+        res.message = "Robot stand up completed.";
     }
     else
     {
         res.success = false;
-        res.message = "Error! Invalid Robot state! \
-        Please be sure to wait some time before switching consecutive states. \
-        check also if Robot state switch from current mode " + std::to_string(custom.high_state.mode) + \
-        " to requested state mode " + std::to_string(req.value) + " is permitted.";
+        res.message = "Error! The robot is not in dumping position. Cannot stand up.";
+    }
+
+    return true;
+}
+
+/**
+ * @brief Callback used for standing down the robot
+ */
+bool standDownCallback(
+    std_srvs::Trigger::Request& req, 
+    std_srvs::Trigger::Response& res
+)
+{
+    const std::lock_guard<std::mutex> lock(stand_mtx);
+    if (custom.high_state.mode == 1) // If in standing mode
+    {
+        custom.high_cmd.euler[0] = 0;
+        custom.high_cmd.euler[1] = 0;
+        custom.high_cmd.euler[2] = 0;
+        custom.high_cmd.velocity[0] = 0;
+        custom.high_cmd.velocity[1] = 0;
+        custom.high_cmd.yawSpeed    = 0;
+        custom.high_cmd.mode = 6;
+        sleep(3);
+        custom.high_cmd.mode = 5;
+
+        res.success = true;
+        res.message = "Robot stand down completed.";
+    }
+    else
+    {
+        res.success = false;
+        res.message = "Error! The robot is not in fixed standing position. Cannot stand down.";
     }
 
     return true;
@@ -598,7 +626,8 @@ int main(int argc, char **argv)
     // Services
     power_off_srv = nh.advertiseService("power_off", powerOffCallback);
     emergency_button_srv = nh.advertiseService("emergency_stop", emergencyStopCallback);
-    set_mode_srv = nh.advertiseService("set_robot_mode", setRobotModeCallback);
+    stand_up_srv = nh.advertiseService("stand_up", standUpCallback);
+    stand_down_srv = nh.advertiseService("stand_down", standDownCallback);
     get_mode_srv = nh.advertiseService("get_robot_mode", getRobotModeCallback);
     set_gate_srv = nh.advertiseService("set_gate_type", setGateTypeCallback);
     get_gate_srv = nh.advertiseService("get_gate_type", getGateTypeCallback);
