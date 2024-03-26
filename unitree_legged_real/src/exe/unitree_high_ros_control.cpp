@@ -367,6 +367,8 @@ bool emergencyStopCallback(
     custom.high_cmd.velocity[1] = 0;
     custom.high_cmd.yawSpeed    = 0;
     custom.high_cmd.mode = 7;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+    custom.high_cmd.mode = 0;
 
     res.success = true;
     res.message = "Emergency Stop! Robot set in dumping mode.";
