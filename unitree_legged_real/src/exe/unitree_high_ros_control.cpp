@@ -289,7 +289,7 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
  */
 void cmdBodyOrientationCallback(const geometry_msgs::Vector3::ConstPtr &msg)
 {
-        // Check if wirless remote command are given
+    // Check if wirless remote command are given
     if ( std::abs(custom.keyData.rx) < 0.1 && 
          std::abs(custom.keyData.lx) < 0.1 && 
          std::abs(custom.keyData.ry) < 0.1 && 
@@ -310,6 +310,7 @@ void cmdBodyOrientationCallback(const geometry_msgs::Vector3::ConstPtr &msg)
             custom.high_cmd.velocity[1] = 0;
             custom.high_cmd.yawSpeed    = 0;
 
+            timer_on = false;
             cmd_orient_active = true;
             t_cmd_orient = ros::Time::now();
         }
@@ -585,7 +586,6 @@ int main(int argc, char **argv)
     cmd_vel_sub = nh.subscribe("cmd_vel", 20, cmdVelCallback);
     body_orient_sub = nh.subscribe("cmd_orient", 20, cmdBodyOrientationCallback);
     
-
     // Publishers
     imu_pub = nh.advertise<sensor_msgs::Imu>("imu", 20);
     joint_states_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 20);

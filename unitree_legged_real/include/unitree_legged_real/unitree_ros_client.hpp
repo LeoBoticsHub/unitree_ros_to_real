@@ -16,7 +16,6 @@
 #include "unitree_legged_msgs/GetInt.h" 
 #include "unitree_legged_msgs/SetBodyOrientation.h"
 #include "unitree_legged_msgs/SetFloat.h"
-#include "unitree_legged_msgs/SetInt.h"
 
 /**
  * @brief Class used to handle the unitree services for controlling the robot in a smoot way
