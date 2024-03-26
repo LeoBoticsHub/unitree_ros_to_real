@@ -37,10 +37,10 @@ To run the high level B1 controller, bash the workspace and run the following:
     rosrun unitree_legged_real unitree_high_ros_control
 ```
 
-## Client service handler interface
+## Unitree ros client interface
 
-To simplify interaction with the services spawn by `unitree_high_ros_control` node, we provided a library containing the class `ClientServicesHandler` which provide a easy to use interface with ros services. \
-See [unitree_services_handler.hpp](unitree_legged_real/include/unitree_legged_real/unitree_services_handler.hpp) and [unitree_services_handler.cpp](unitree_legged_real/src/unitree_services_handler.cpp) to have an hint on how to use it.
+To simplify interaction with the services spawn by `unitree_high_ros_control` node, we provided a library containing the class `UnitreeRosClient` which provide a easy to use interface with ros services. \
+See [unitree_ros_client.hpp](unitree_legged_real/include/unitree_legged_real/unitree_ros_client.hpp) and [unitree_ros_client.cpp](unitree_legged_real/src/unitree_ros_client.cpp) to have an hint on how to use it.
 
 ## OLD README VERSION
 

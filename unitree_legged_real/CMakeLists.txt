@@ -22,7 +22,7 @@ link_directories(/usr/local/lib/libunitree_legged_sdk.so)
 
 catkin_package(
     INCLUDE_DIRS include
-    LIBRARIES unitree_services_handler
+    LIBRARIES unitree_ros_client
 )
 
 set(EXTRA_LIBS -pthread unitree_legged_sdk)
@@ -48,8 +48,8 @@ target_link_libraries(unitree_high_ros_control ${EXTRA_LIBS} ${catkin_LIBRARIES}
 add_dependencies(unitree_high_ros_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 # Service interface library to easily call high level ros services
-add_library(unitree_services_handler SHARED src/unitree_services_handler.cpp)
-target_link_libraries(unitree_high_ros_control ${catkin_LIBRARIES})
+add_library(unitree_ros_client SHARED src/unitree_ros_client.cpp)
+target_link_libraries(unitree_ros_client ${catkin_LIBRARIES})
 
 # Install
 install(
@@ -58,7 +58,7 @@ install(
 )
 
 install(
-  TARGETS unitree_services_handler
+  TARGETS unitree_ros_client
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
