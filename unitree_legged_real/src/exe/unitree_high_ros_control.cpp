@@ -77,6 +77,7 @@ Custom custom;
 
 // Subscribers
 ros::Subscriber cmd_vel_sub;
+ros::Subscriber body_orient_sub;
 
 // Publishers
 ros::Publisher imu_pub;
@@ -95,7 +96,6 @@ ros::ServiceServer set_foot_height_srv;
 ros::ServiceServer set_body_height_srv;
 ros::ServiceServer get_foot_height_srv;
 ros::ServiceServer get_body_height_srv;
-ros::ServiceServer set_body_orientation_srv;
 
 // ROS messages
 sensor_msgs::Imu imu_msg;
@@ -127,9 +127,8 @@ static std::array<std::string, 12> b1_motor_names
 }};
 
 // Other variables
-ros::Time t, t_prev, t_timer, t_cmd_vel;
-bool timer_on = false;
-bool cmd_vel_active = false;
+ros::Time t, t_prev, t_timer, t_cmd_vel, t_cmd_orient;
+bool timer_on, cmd_vel_active, cmd_orient_active = false;
 std::mutex stand_mtx;
 
 // ROS State Publisher
@@ -140,14 +139,33 @@ void highStatePublisher()
 {
     t = ros::Time::now();
 
-    // zero cmd vel if no command are not received 
+    // zero cmd vel if no command are received 
     if ((t - t_cmd_vel).sec > 1 && custom.high_state.mode != 7 && cmd_vel_active)
     {
         custom.high_cmd.mode = 2;
         custom.high_cmd.velocity[0] = 0;
         custom.high_cmd.velocity[1] = 0;
         custom.high_cmd.yawSpeed = 0;
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        custom.high_cmd.mode = 0;
         cmd_vel_active = false;
+    }
+
+    // zero cmd vel if no command are received 
+    if ((t - t_cmd_orient).sec > 1 && custom.high_state.mode != 7 && cmd_orient_active)
+    {
+        custom.high_cmd.mode = 1;
+        custom.high_cmd.euler[0] = 0;
+        custom.high_cmd.euler[1] = 0;
+        custom.high_cmd.euler[2] = 0;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+        custom.high_cmd.mode = 2;
+        custom.high_cmd.velocity[0] = 0;
+        custom.high_cmd.velocity[1] = 0;
+        custom.high_cmd.yawSpeed = 0;
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        custom.high_cmd.mode = 0;
+        cmd_orient_active = false;
     }
 
     if (t != t_prev)
@@ -221,7 +239,8 @@ void highStatePublisher()
  *
  * @brief cmd_vel callback that receive a twist command message and send it to the robot
  * 
- * @param msg The twist velocity message to send to the robot
+ * @param msg The twist velocity message to send to the robot, 
+ * forwardSpeed range:[-0.8, 1.2], sideSpeed range: [-0.25, 0.25], range:[-0.75, 0.75]
  * 
  */
 void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
@@ -236,6 +255,9 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
         if(timer_on && (t - t_timer).sec >= 5 || !timer_on)
         {
             custom.high_cmd.mode = 2;
+            custom.high_cmd.euler[0] = 0;
+            custom.high_cmd.euler[1] = 0;
+            custom.high_cmd.euler[2] = 0;
             custom.high_cmd.velocity[0] = msg->linear.x;
             custom.high_cmd.velocity[1] = msg->linear.y;
             custom.high_cmd.yawSpeed = msg->angular.z;
@@ -256,7 +278,53 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
         custom.high_cmd.velocity[1] = 0;
         custom.high_cmd.yawSpeed = 0;
     }
+}
 
+
+/**
+ * @brief Callback used for setting robot orientation
+ * 
+ * @param msg [geometry_msgs/Vector3] roll pitch yaw angle references.
+ * roll range: [-0.3, 0.3], pitch range: [-0.3, 0.3], yaw range: [-0.6, 0.6]
+ */
+void cmdBodyOrientationCallback(const geometry_msgs::Vector3::ConstPtr &msg)
+{
+        // Check if wirless remote command are given
+    if ( std::abs(custom.keyData.rx) < 0.1 && 
+         std::abs(custom.keyData.lx) < 0.1 && 
+         std::abs(custom.keyData.ry) < 0.1 && 
+         std::abs(custom.keyData.ly) < 0.1 )
+    {
+        if (!cmd_vel_active &&
+            (timer_on && (t - t_timer).sec >= 5 || !timer_on) &&
+            msg->x >= -0.3 && msg->x <= 0.3 &&
+            msg->y >= -0.3 && msg->y <= 0.3 &&
+            msg->z >= -0.6 && msg->z <= 0.6
+        )
+        {
+            custom.high_cmd.mode = 1;
+            custom.high_cmd.euler[0] = msg->x;
+            custom.high_cmd.euler[1] = msg->y;
+            custom.high_cmd.euler[2] = msg->z;
+            custom.high_cmd.velocity[0] = 0;
+            custom.high_cmd.velocity[1] = 0;
+            custom.high_cmd.yawSpeed    = 0;
+
+            cmd_orient_active = true;
+            t_cmd_orient = ros::Time::now();
+        }
+    }
+    else
+    {
+        // initialize timer if wirless remote commands are received
+        if(!timer_on)
+            timer_on = true;
+        t_timer = ros::Time::now();
+        custom.high_cmd.mode = 0;
+        custom.high_cmd.euler[0] = 0;
+        custom.high_cmd.euler[1] = 0;
+        custom.high_cmd.euler[2] = 0;
+    }
 }
 
 /**
@@ -418,7 +486,7 @@ bool setFootHeightCallback(
 )
 {
     // check if the request is in the allowed delta bounds
-    if (req.value >= -0.1 && req.value <= 0.15)
+    if (req.value >= -0.1 && req.value <= 0.15001)
     {
         custom.high_cmd.footRaiseHeight = req.value;
         res.success = true;
@@ -486,44 +554,6 @@ bool getBodyHeightCallback(
     return true;
 }
 
-/**
- * @brief Callback used for setting robot speed level, e.g. normal, fast, etc
- * 
- * @param unitree_legged_msgs/SetBodyOrientation roll pitch yaw angle references. 
- * roll range: [-0.3, 0.3], pitch range: [-0.3, 0.3], yaw range: [-0.6, 0.6]
- */
-bool setBodyOrientationCallback(
-    unitree_legged_msgs::SetBodyOrientation::Request& req, 
-    unitree_legged_msgs::SetBodyOrientation::Response& res
-)
-{
-    // it works just in mode 1 andhas bounds for the three angles
-    if (custom.high_state.mode == 1 && 
-        req.rpy.x >= -0.3 && req.rpy.x <= 0.3 &&
-        req.rpy.y >= -0.3 && req.rpy.y <= 0.3 &&
-        req.rpy.z >= -0.6 && req.rpy.z <= 0.6
-    )
-    {
-        custom.high_cmd.euler[0] = req.rpy.x;
-        custom.high_cmd.euler[1] = req.rpy.y;
-        custom.high_cmd.euler[2] = req.rpy.z;
-        custom.high_cmd.velocity[0] = 0;
-        custom.high_cmd.velocity[1] = 0;
-        custom.high_cmd.yawSpeed    = 0;
-        res.success = true;
-        res.message = "Robot orientation set to: roll = " + std::to_string(req.rpy.x) + ", pitch = " + \
-        std::to_string(req.rpy.y) + ", yaw = " + std::to_string(req.rpy.z);
-    }
-    else
-    {
-        res.success = false;
-        res.message = "Error! Invalid Robot orientation! Please check if robot state mode is set to 1 and set a robot orientation between roll range: [-0.3, 0.3], pitch range: [-0.3, 0.3], yaw range: [-0.6, 0.6]";
-    }
-
-    res.success = true;
-
-    return true;
-}
 
 int main(int argc, char **argv)
 {
@@ -542,10 +572,12 @@ int main(int argc, char **argv)
     odom_H_trunk.child_frame_id = BASE_LINK_NAME;
 
     // initialize time
-    t = t_prev = t_timer = t_cmd_vel = ros::Time::now();
+    t = t_prev = t_timer = t_cmd_vel = t_cmd_orient = ros::Time::now();
 
     // Subscribers
     cmd_vel_sub = nh.subscribe("cmd_vel", 20, cmdVelCallback);
+    body_orient_sub = nh.subscribe("cmd_orient", 20, cmdBodyOrientationCallback);
+    
 
     // Publishers
     imu_pub = nh.advertise<sensor_msgs::Imu>("imu", 20);
@@ -564,7 +596,6 @@ int main(int argc, char **argv)
     get_foot_height_srv = nh.advertiseService("get_foot_height", getFootHeightCallback);
     set_body_height_srv = nh.advertiseService("set_body_height", setBodyHeightCallback);
     get_body_height_srv = nh.advertiseService("get_body_height", getBodyHeightCallback);
-    set_body_orientation_srv = nh.advertiseService("set_body_orientation", setBodyOrientationCallback);
 
     // high state udp loop function
     LoopFunc loop_udpSend("high_udp_send", 0.002, 3, boost::bind(&Custom::highUdpSend, &custom));
