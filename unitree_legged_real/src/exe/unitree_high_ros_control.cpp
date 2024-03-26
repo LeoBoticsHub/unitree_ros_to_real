@@ -90,9 +90,6 @@ ros::ServiceServer emergency_button_srv;
 ros::ServiceServer stand_up_srv;
 ros::ServiceServer stand_down_srv;
 ros::ServiceServer get_mode_srv;
-ros::ServiceServer set_gate_srv;
-ros::ServiceServer get_gate_srv;
-ros::ServiceServer set_speed_srv;
 ros::ServiceServer battery_state_srv;
 ros::ServiceServer set_foot_height_srv;
 ros::ServiceServer set_body_height_srv;
@@ -408,73 +405,6 @@ bool getRobotModeCallback(
 }
 
 /**
- * @brief Callback used for setting robot gate type, e.g. trot, trot running, staris climb, etc
- */
-bool setGateTypeCallback(
-    unitree_legged_msgs::SetInt::Request& req, 
-    unitree_legged_msgs::SetInt::Response& res
-)
-{   
-    if (req.value >= 0 && req.value <= 4)
-    {
-        custom.high_cmd.gaitType = req.value;
-        custom.high_cmd.velocity[0] = 0;
-        custom.high_cmd.velocity[1] = 0;
-        custom.high_cmd.yawSpeed    = 0;
-        res.success = true;
-        res.message = "Gate type set to: " + std::to_string(req.value);
-    }
-    else
-    {
-        res.success = false;
-        res.message = "Error! Invalid gate type! Please set a gate type between 0 and 4";
-    }
-
-    return true;
-}
-
-/**
- * @brief Callback used for getting robot gate type, e.g. trot, trot running, staris climb, etc
- */
-bool getGateTypeCallback(
-    unitree_legged_msgs::GetInt::Request& /* req */, 
-    unitree_legged_msgs::GetInt::Response& res
-)
-{
-    res.value = custom.high_state.gaitType;
-
-    return true;
-}
-
-/**
- * @brief Callback used for setting robot speed level, e.g. normal, fast, etc
- */
-bool setSpeedLevelCallback(
-    unitree_legged_msgs::SetInt::Request& req, 
-    unitree_legged_msgs::SetInt::Response& res
-)
-{
-    // apparently it works just in mode 3 // TODO TO BE CHECKED
-    if (custom.high_state.mode == 3 && req.value >= 0 && req.value <= 2)
-    {
-        custom.high_cmd.speedLevel = req.value;
-        custom.high_cmd.velocity[0] = 0;
-        custom.high_cmd.velocity[1] = 0;
-        custom.high_cmd.yawSpeed    = 0;
-        res.success = true;
-        res.message = "Speed level set to: " + std::to_string(req.value);
-    }
-    else
-    {
-        res.success = false;
-        res.message = "Error! Invalid speed level! \
-        Please check if robot state mode is set to 3 and set a speed level between 0 and 2";
-    }
-
-    return true;
-}
-
-/**
  * @brief Callback used for setting robot foot raise height
  * 
  * @param unitree_legged_msgs/SetFloat delta value to add to the current foot height. Range: [-0.1, 0.15]
@@ -629,9 +559,6 @@ int main(int argc, char **argv)
     stand_up_srv = nh.advertiseService("stand_up", standUpCallback);
     stand_down_srv = nh.advertiseService("stand_down", standDownCallback);
     get_mode_srv = nh.advertiseService("get_robot_mode", getRobotModeCallback);
-    set_gate_srv = nh.advertiseService("set_gate_type", setGateTypeCallback);
-    get_gate_srv = nh.advertiseService("get_gate_type", getGateTypeCallback);
-    set_speed_srv = nh.advertiseService("set_speed_level", setSpeedLevelCallback);
     battery_state_srv = nh.advertiseService("get_battery_state", batteryStateCallback);
     set_foot_height_srv = nh.advertiseService("set_foot_height", setFootHeightCallback);
     get_foot_height_srv = nh.advertiseService("get_foot_height", getFootHeightCallback);
