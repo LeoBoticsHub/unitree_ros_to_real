@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <mutex>
 
 #include <tf2_ros/transform_broadcaster.h>
 #include <sensor_msgs/JointState.h>
@@ -126,8 +127,10 @@ static std::array<std::string, 12> b1_motor_names
 }};
 
 // Other variables
-ros::Time t, t_prev, t_timer, t_mode_timer;
+ros::Time t, t_prev, t_timer, t_cmd_vel;
 bool timer_on = false;
+bool cmd_vel_active = false;
+std::mutex stand_mtx;
 
 // ROS State Publisher
 /**
@@ -136,6 +139,16 @@ bool timer_on = false;
 void highStatePublisher()
 {
     t = ros::Time::now();
+
+    // zero cmd vel if no command are not received 
+    if ((t - t_cmd_vel).sec > 1 && custom.high_state.mode != 7 && cmd_vel_active)
+    {
+        custom.high_cmd.mode = 2;
+        custom.high_cmd.velocity[0] = 0;
+        custom.high_cmd.velocity[1] = 0;
+        custom.high_cmd.yawSpeed = 0;
+        cmd_vel_active = false;
+    }
 
     if (t != t_prev)
     {   
@@ -222,11 +235,14 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
         // check timer if previous wirless remote commands have been receives
         if(timer_on && (t - t_timer).sec >= 5 || !timer_on)
         {
+            custom.high_cmd.mode = 2;
             custom.high_cmd.velocity[0] = msg->linear.x;
             custom.high_cmd.velocity[1] = msg->linear.y;
             custom.high_cmd.yawSpeed = msg->angular.z;
   
             timer_on = false;
+            cmd_vel_active = true;
+            t_cmd_vel = ros::Time::now();
         }
     }
     else
@@ -235,6 +251,7 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
         if(!timer_on)
             timer_on = true;
         t_timer = ros::Time::now();
+        custom.high_cmd.mode = 0;
         custom.high_cmd.velocity[0] = 0;
         custom.high_cmd.velocity[1] = 0;
         custom.high_cmd.yawSpeed = 0;
@@ -525,7 +542,7 @@ int main(int argc, char **argv)
     odom_H_trunk.child_frame_id = BASE_LINK_NAME;
 
     // initialize time
-    t = t_prev = t_timer = t_mode_timer = ros::Time::now();
+    t = t_prev = t_timer = t_cmd_vel = ros::Time::now();
 
     // Subscribers
     cmd_vel_sub = nh.subscribe("cmd_vel", 20, cmdVelCallback);
