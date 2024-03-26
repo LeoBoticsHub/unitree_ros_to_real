@@ -24,7 +24,6 @@
 #include "unitree_legged_msgs/GetInt.h" 
 #include "unitree_legged_msgs/SetBodyOrientation.h"
 #include "unitree_legged_msgs/SetFloat.h"
-#include "unitree_legged_msgs/SetInt.h"
 
 using namespace UNITREE_LEGGED_SDK;
 
@@ -125,19 +124,6 @@ static std::array<std::string, 12> b1_motor_names
     "FR_hip_joint", "FR_thigh_joint", "FR_calf_joint", 
     "RR_hip_joint", "RR_thigh_joint", "RR_calf_joint", 
 }};
-
-// robot state map
-const std::map<int,std::vector<int>> robot_state_mapping =  {
-    {0, std::vector<int>{1,2,3,5}}, // DEFUALT STAND
-    {1, std::vector<int>{0,2,3,5}}, // FORCED STAND
-    {2, std::vector<int>{0,1,3,5}}, // VELOCITY WALKING
-    {3, std::vector<int>{0,1,2,5}}, // RUNNING MODE?
-    // {4, std::vector<int>()}, // PATH FOLLOWING?
-    {5, std::vector<int>{6,7}}, // STAND DOWN
-    {6, std::vector<int>{0,1,2,3,5}}, // STAND UP
-    {7, std::vector<int>(6)}, // DAMPING MODE
-    // {9, std::vector<int>()}, // RECOVERY STAND
-};
 
 // Other variables
 ros::Time t, t_prev, t_timer, t_mode_timer;
@@ -464,8 +450,7 @@ bool setBodyHeightCallback(
     else
     {
         res.success = false;
-        res.message = "Error! Invalid body height delta! \
-        Please provide a delta in the range [-0.1, 0.15].";
+        res.message = "Error! Invalid body height delta! Please provide a delta in the range [-0.1, 0.15].";
     }
 
     return true;
@@ -515,9 +500,7 @@ bool setBodyOrientationCallback(
     else
     {
         res.success = false;
-        res.message = "Error! Invalid Robot orientation! \
-        Please check if robot state mode is set to 1 and set a robot orientation between \
-        roll range: [-0.3, 0.3], pitch range: [-0.3, 0.3], yaw range: [-0.6, 0.6]";
+        res.message = "Error! Invalid Robot orientation! Please check if robot state mode is set to 1 and set a robot orientation between roll range: [-0.3, 0.3], pitch range: [-0.3, 0.3], yaw range: [-0.6, 0.6]";
     }
 
     res.success = true;
