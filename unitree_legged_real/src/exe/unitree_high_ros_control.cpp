@@ -107,7 +107,7 @@ geometry_msgs::TransformStamped odom_H_trunk;
 // Constants
 const int N_MOTORS{12};
 const std::string BASE_LINK_NAME{"trunk"};
-const std::string IMU_NAME{"imu"};
+const std::string IMU_NAME{"imu_link"};
 const std::string ODOM_NAME{"odom"};
 
 // Joint variables
